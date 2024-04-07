@@ -22,8 +22,12 @@ const User = mongoose.model("User", {
   activity: [
     {
       day: String,
-      enterTime: String,
-      exitTime: String,
+      times: [
+        {
+          enterTime: String,
+          exitTime: String,
+        },
+      ],
     },
   ],
   salary: { type: Number, required: true },
@@ -39,17 +43,16 @@ app.post("/addWorker", async (req, res) => {
       salary: req.body.salary,
       activity: req.body.activity,
     });
-    console.log(user);
     await user.save();
     res.json({
       success: true,
     });
   } catch (error) {
-    res.status(400).send(error);
+    console.log(error);
   }
 });
 
-//!remove
+// !remove
 app.post("/removeWorker", async (req, res) => {
   try {
     await User.findOneAndDelete({ fin: req.body.fin });
@@ -94,6 +97,78 @@ app.post("/updateWorker", async (req, res) => {
       user.surname = req.body.surname;
       user.salary = req.body.salary;
       user.activity = req.body.activity;
+      await user.save();
+      res.json({
+        success: true,
+      });
+    } else {
+      res.json({
+        success: false,
+        error: "Worker not found",
+      });
+    }
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+//?addActivity
+app.post("/addActivity", async (req, res) => {
+  try {
+    const user = await User.findOne({
+      fin: req.body.fin,
+    });
+    if (user) {
+      const d = new Date();
+      const day = d.getMonth() + 1 + "." + d.getDate() + "." + d.getFullYear();
+      const time = d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds();
+      if (
+        user.activity.some((activity) => activity.day == day) &&
+        user.activity.some(
+          (activity) => activity.times[activity.times.length - 1].exitTime != ""
+        )
+      )
+        user.activity = user.activity.map((activity) =>
+          activity.day == day
+            ? {
+                ...activity,
+                times: [
+                  ...activity.times,
+                  {
+                    enterTime: time,
+                    exitTime: "",
+                  },
+                ],
+              }
+            : activity
+        );
+      else if (user.activity.some((activity) => activity.day == day))
+        user.activity = user.activity.map((activity) =>
+          activity.day == day
+            ? {
+                ...activity,
+                times: activity.times.map((item, index) =>
+                  activity.times.length - 1 == index
+                    ? { ...item, exitTime: time }
+                    : item
+                ),
+              }
+            : activity
+        );
+      else
+        user.activity = [
+          ...user.activity,
+          {
+            day: day,
+            times: [
+              {
+                enterTime: time,
+                exitTime: "",
+              },
+            ],
+          },
+        ];
+
       await user.save();
       res.json({
         success: true,
