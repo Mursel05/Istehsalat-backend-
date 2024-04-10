@@ -1,10 +1,10 @@
-const PORT =process.env.PORT|| 4000;
+const PORT = process.env.PORT || 4000;
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
 const cors = require("cors");
 
-app.use(express.json());  
+app.use(express.json());
 app.use(cors());
 
 mongoose.connect(
@@ -30,6 +30,12 @@ const User = mongoose.model("User", {
       ],
     },
   ],
+  graduation: [
+    {
+      startTime: String,
+      endTime: String,
+    },
+  ],
   salary: { type: Number, required: true },
 });
 
@@ -42,13 +48,17 @@ app.post("/addWorker", async (req, res) => {
       surname: req.body.surname,
       salary: req.body.salary,
       activity: req.body.activity,
+      graduation: req.body.graduation,
     });
     await user.save();
     res.json({
       success: true,
     });
   } catch (error) {
-    console.log(error);
+    res.json({
+      success: false,
+      error,
+    });
   }
 });
 
@@ -60,7 +70,10 @@ app.post("/removeWorker", async (req, res) => {
       success: true,
     });
   } catch (error) {
-    console.log(error);
+    res.json({
+      success: false,
+      error,
+    });
   }
 });
 
@@ -70,7 +83,10 @@ app.get("/getWorkers", async (req, res) => {
     const workers = await User.find({});
     res.send(workers);
   } catch (error) {
-    console.log(error);
+    res.json({
+      success: false,
+      error,
+    });
   }
 });
 
@@ -82,7 +98,10 @@ app.get("/getWorker", async (req, res) => {
     if (worker) res.send(worker);
     else res.json({ success: false, error: "Worker not found" });
   } catch (error) {
-    console.log(error);
+    res.json({
+      success: false,
+      error,
+    });
   }
 });
 
@@ -97,6 +116,7 @@ app.post("/updateWorker", async (req, res) => {
       user.surname = req.body.surname;
       user.salary = req.body.salary;
       user.activity = req.body.activity;
+      user.graduation = req.body.graduation;
       await user.save();
       res.json({
         success: true,
@@ -108,7 +128,10 @@ app.post("/updateWorker", async (req, res) => {
       });
     }
   } catch (error) {
-    console.log(error);
+    res.json({
+      success: false,
+      error,
+    });
   }
 });
 
@@ -121,7 +144,8 @@ app.post("/addActivity", async (req, res) => {
     if (user) {
       const d = new Date();
       const day = d.getMonth() + 1 + "." + d.getDate() + "." + d.getFullYear();
-      const time = d.getHours() +4+ ":" + d.getMinutes() + ":" + d.getSeconds();
+      const time =
+        d.getHours() + 4 + ":" + d.getMinutes() + ":" + d.getSeconds();
       if (
         user.activity.some((activity) => activity.day == day) &&
         user.activity.some(
@@ -168,7 +192,6 @@ app.post("/addActivity", async (req, res) => {
             ],
           },
         ];
-
       await user.save();
       res.json({
         success: true,
@@ -180,7 +203,43 @@ app.post("/addActivity", async (req, res) => {
       });
     }
   } catch (error) {
-    console.log(error);
+    res.json({
+      success: false,
+      error,
+    });
+  }
+});
+
+//?addGraduation
+app.post("/addGraduation", async (req, res) => {
+  try {
+    const user = await User.findOne({
+      fin: req.body.fin,
+    });
+    if (user) {
+      const d = new Date();
+      user.graduation = [
+        ...user.graduation,
+        {
+          startTime: req.body.startTime,
+          endTime: req.body.endTime,
+        },
+      ];
+      await user.save();
+      res.json({
+        success: true,
+      });
+    } else {
+      res.json({
+        success: false,
+        error: "Worker not found",
+      });
+    }
+  } catch (error) {
+    res.json({
+      success: false,
+      error,
+    });
   }
 });
 
