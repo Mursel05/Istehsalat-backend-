@@ -121,7 +121,7 @@ app.post("/addActivity", async (req, res) => {
     if (user) {
       const d = new Date();
       const day = d.getMonth() + 1 + "." + d.getDate() + "." + d.getFullYear();
-      const time = d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds();
+      const time = d.getHours() +4+ ":" + d.getMinutes() + ":" + d.getSeconds();
       if (
         user.activity.some((activity) => activity.day == day) &&
         user.activity.some(
