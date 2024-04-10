@@ -143,7 +143,7 @@ app.post("/addActivity", async (req, res) => {
     });
     if (user) {
       const d = new Date();
-      const day = d.getMonth() + 1 + "." + d.getDate() + "." + d.getFullYear();
+      const day = d.getFullYear() + "-" + d.getMonth() + 1 + "-" + d.getDate();
       const time =
         d.getHours() + 4 + ":" + d.getMinutes() + ":" + d.getSeconds();
       if (
