@@ -1,4 +1,4 @@
-const port = 4000;
+const PORT =process.env.PORT|| 4000;
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
@@ -184,10 +184,10 @@ app.post("/addActivity", async (req, res) => {
   }
 });
 
-app.listen(port, (error) => {
+app.listen(PORT, (error) => {
   if (error) {
     console.log("Error: ", error);
   } else {
-    console.log("Server is running on port", port);
+    console.log("Server is running on port", PORT);
   }
 });
